@@ -68,7 +68,6 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 
     // methods
-
     this.handleResize = function () {
 
         this.screen.width = window.innerWidth;
@@ -88,14 +87,13 @@ THREE.TrackballControls = function ( object, domElement ) {
             this[ event.type ]( event );
 
         }
-
     };
 
     this.getMouseOnScreen = function ( clientX, clientY ) {
 
         return new THREE.Vector2(
-            ( clientX - _this.screen.offsetLeft ) / _this.radius * 0.5,
-            ( clientY - _this.screen.offsetTop ) / _this.radius * 0.5
+                ( clientX - _this.screen.offsetLeft ) / _this.radius * 0.5,
+                ( clientY - _this.screen.offsetTop ) / _this.radius * 0.5
         );
 
     };
@@ -103,8 +101,8 @@ THREE.TrackballControls = function ( object, domElement ) {
     this.getMouseProjectionOnBall = function ( clientX, clientY ) {
 
         var mouseOnBall = new THREE.Vector3(
-            ( clientX - _this.screen.width * 0.5 - _this.screen.offsetLeft ) / _this.radius,
-            ( _this.screen.height * 0.5 + _this.screen.offsetTop - clientY ) / _this.radius,
+                ( clientX - _this.screen.width * 0.5 - _this.screen.offsetLeft ) / _this.radius,
+                ( _this.screen.height * 0.5 + _this.screen.offsetTop - clientY ) / _this.radius,
             0.0
         );
 
@@ -295,72 +293,39 @@ THREE.TrackballControls = function ( object, domElement ) {
         _this.object.lookAt( _this.target );
 
         _this.dispatchEvent( changeEvent );
-
         lastPosition.copy( _this.object.position );
 
     };
 
-    // listeners
-
-    function keydown( event ) {
-
-        if ( _this.enabled === false ) return;
-
-        window.removeEventListener( 'keydown', keydown );
-
-        _prevState = _state;
-
-        if ( _state !== STATE.NONE ) {
-
-            return;
-
-        } else if ( event.keyCode === _this.keys[ STATE.ROTATE ] && !_this.noRotate ) {
-
-            _state = STATE.ROTATE;
-
-        } else if ( event.keyCode === _this.keys[ STATE.ZOOM ] && !_this.noZoom ) {
-
-            _state = STATE.ZOOM;
-
-        } else if ( event.keyCode === _this.keys[ STATE.PAN ] && !_this.noPan ) {
-
-            _state = STATE.PAN;
-
-        }
-
-    }
-
-    function keyup( event ) {
-
-        if ( _this.enabled === false ) return;
-
-        _state = _prevState;
-
-        window.addEventListener( 'keydown', keydown, false );
-
-    }
-
-    this.startX = 0;
-    this.startY = 200;
+    //autoRun
+    this.originalX = 400;
+    this.startX = this.originalX;
+    this.orignialY = 500;
+    this.startY = this.orignialY;
+    this.moveParam = 20;
+    this.rotateInterval =null;
     this.startRotate = function(){
 
-
-            _rotateStart = _rotateEnd = _this.getMouseProjectionOnBall( _this.startX, _this.startY );
-        setInterval(function(){
+        _rotateStart = _rotateEnd = _this.getMouseProjectionOnBall( _this.startX, _this.startY );
+        _this.rotateInterval = setInterval(function(){
             _this.rotateMove();
         },50);
 
-
     };
     this.rotateMove = function(){
-
-
-            _rotateEnd = _this.getMouseProjectionOnBall( _this.startX, _this.startY );
-
-        _this.startX = _this.startX >= window.innerWidth ? 500 : _this.startX+10;
-
+        if( _this.startX >= window.innerWidth) _this.moveParam = -20;
+        if( _this.startX <= _this.originalX) _this.moveParam = 20;
+        _this.startX += _this.moveParam;
+        _rotateEnd = _this.getMouseProjectionOnBall(_this.startX, _this.startY);
     };
 
+    this.stopRotate = function(callback,arg1,arg2,arg3){
+        clearInterval(_this.rotateInterval);
+        // _this.reset();
+        callback(arg1,arg2,arg3);
+    };
+
+    // listeners
     function mousedown( event ) {
         if ( _this.enabled === false ) return;
 
@@ -426,6 +391,44 @@ THREE.TrackballControls = function ( object, domElement ) {
 
         document.removeEventListener( 'mousemove', mousemove );
         document.removeEventListener( 'mouseup', mouseup );
+
+    }
+
+    function keydown( event ) {
+
+        if ( _this.enabled === false ) return;
+
+        window.removeEventListener( 'keydown', keydown );
+
+        _prevState = _state;
+
+        if ( _state !== STATE.NONE ) {
+
+            return;
+
+        } else if ( event.keyCode === _this.keys[ STATE.ROTATE ] && !_this.noRotate ) {
+
+            _state = STATE.ROTATE;
+
+        } else if ( event.keyCode === _this.keys[ STATE.ZOOM ] && !_this.noZoom ) {
+
+            _state = STATE.ZOOM;
+
+        } else if ( event.keyCode === _this.keys[ STATE.PAN ] && !_this.noPan ) {
+
+            _state = STATE.PAN;
+
+        }
+
+    }
+
+    function keyup( event ) {
+
+        if ( _this.enabled === false ) return;
+
+        _state = _prevState;
+
+        window.addEventListener( 'keydown', keydown, false );
 
     }
 
@@ -536,19 +539,19 @@ THREE.TrackballControls = function ( object, domElement ) {
 
     }
 
-    this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
+    /*   this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
 
-    this.domElement.addEventListener( 'mousedown', mousedown, false );
+     this.domElement.addEventListener( 'mousedown', mousedown, false );
 
-    this.domElement.addEventListener( 'mousewheel', mousewheel, false );
-    this.domElement.addEventListener( 'DOMMouseScroll', mousewheel, false ); // firefox
+     this.domElement.addEventListener( 'mousewheel', mousewheel, false );
+     this.domElement.addEventListener( 'DOMMouseScroll', mousewheel, false ); // firefox
 
-    this.domElement.addEventListener( 'touchstart', touchstart, false );
-    this.domElement.addEventListener( 'touchend', touchend, false );
-    this.domElement.addEventListener( 'touchmove', touchmove, false );
+     this.domElement.addEventListener( 'touchstart', touchstart, false );
+     this.domElement.addEventListener( 'touchend', touchend, false );
+     this.domElement.addEventListener( 'touchmove', touchmove, false );
 
-    window.addEventListener( 'keydown', keydown, false );
-    window.addEventListener( 'keyup', keyup, false );
+     window.addEventListener( 'keydown', keydown, false );
+     window.addEventListener( 'keyup', keyup, false );*/
 
     this.handleResize();
 
