@@ -3,11 +3,13 @@ body {
   height: 100%;
 }
 body {
-  background-color:#000;
+  background-image: url("../images/LEDbg.jpg");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
   margin: 0;
   font-family: Helvetica, sans-serif;
   overflow: hidden;
-  font-family: "ï¿½ï¿½ï¿½ï¿½";
+  font-family: "ºÚÌå";
 }
 a {
   color: #ffffff;
@@ -80,6 +82,7 @@ a {
   color: #000000;
   font-weight: bold;
   z-index: 100;
+  font-family: "ºÚÌå";
 }
 button {
   color: rgba(127, 255, 255, 0.75);

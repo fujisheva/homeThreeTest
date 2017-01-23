@@ -11,8 +11,8 @@
 <div id="container"></div>
 <div id="menu">
     <button id="run">RUN</button>
-    <button id="stop">STOP</button>
 </div>
+<!--<button id="sphere">STOP</button>-->
 <script src="js/three.min.js"></script>
 <script src="js/tween.min.js"></script>
 <script src="js/TrackballControls.js"></script>
@@ -138,63 +138,88 @@ var table = [
     [ "Uus", "Ununseptium", "(294)", 17, 7 ],
     [ "Uuo", "Ununoctium", "(294)", 18, 7 ]
 ];
+
 var camera, scene, renderer;
 var geometry, material, mesh;
+
 var controls;
+
 var objects = [];
 var targets = { table: [], sphere: []};
 var chosenNum = null;
 var b = null;
 var time =Date.now()-100000;
+
     init();
     animate();
 
 function init() {
+
     camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 5000 );
     camera.position.z = 1800;
+
     scene = new THREE.Scene();
+
     for ( var i = 0; i < table.length; i ++ ) {
+
         var item = table[ i ];
+
         var element = document.createElement( 'div' );
         element.className = 'element';
         element.style.backgroundColor = 'rgba(0,327,327,' + ( Math.random() * 0.5 + 0.25 ) + ')';
         var symbol = document.createElement('img');
         symbol.src = 'images/head.png';
         element.appendChild(symbol);
+
         var details = document.createElement( 'div' );
         details.className = 'details';
-        details.innerHTML = 'watcher';
+        details.innerHTML = 'winner';
         element.appendChild( details );
+
         var object = new THREE.CSS3DObject( element );
         object.position.x = Math.random() * 4000 - 2000;
         object.position.y = Math.random() * 4000 - 2000;
         object.position.z = Math.random() * 4000 - 2000;
         scene.add( object );
+
         objects.push( object );
     }
 
     // table
+
     for ( var i = 0; i < objects.length; i ++ ) {
+
         var item = table[ i ];
         var object = new THREE.Object3D();
         object.position.x = ( item[ 3 ] * 160 ) - 1540;
         object.position.y = - ( item[ 4 ] * 200 ) + 1100;
+
         targets.table.push( object );
+
     }
 
     // sphere
+
     var vector = new THREE.Vector3();
+
     for ( var i = 0, l = objects.length; i < l; i ++ ) {
+
         var object = objects[ i ];
         var phi = Math.acos( -1 + ( 2 * i ) / l );
         var theta = Math.sqrt( l * Math.PI ) * phi;
+
         var object = new THREE.Object3D();
+
         object.position.x = 1000 * Math.cos( theta ) * Math.sin( phi );
         object.position.y = 1000 * Math.sin( theta ) * Math.sin( phi );
         object.position.z = 1000 * Math.cos( phi );
+
         vector.copy( object.position ).multiplyScalar( 2 );
+
         object.lookAt( vector );
+
         targets.sphere.push( object );
+
     }
 
     renderer = new THREE.CSS3DRenderer();
@@ -202,16 +227,21 @@ function init() {
     renderer.domElement.style.position = 'absolute';
     renderer.domElement.style.top = 0;
     document.getElementById( 'container' ).appendChild( renderer.domElement );
+
     controls = new THREE.TrackballControls( camera, renderer.domElement );
     controls.rotateSpeed = 0.5;
     controls.addEventListener( 'change', render );
+
     document.getElementById( 'run' ).addEventListener( 'click', function ( event ) {
         transform( targets.sphere, 500 ,1);
         controls.startRotate();
         setTimeout(stopRotate,4000);
     }, false );
-    document.getElementById( 'stop' ).addEventListener( 'click', stopRotate, false );
+
+    //document.getElementById( 'sphere' ).addEventListener( 'click', stopRotate, false );
+
     transform( targets.table, 500,1);
+
     window.addEventListener( 'resize', onWindowResize, false );
 
 }
@@ -225,15 +255,12 @@ function transform( targets, duration ,scaleNum) {
     TWEEN.removeAll();
     var scale = new THREE.Vector3(scaleNum,scaleNum,scaleNum);
     var randomNum =Math.floor(Math.random()*objects.length + 1);
+
     for ( var i = 0; i < objects.length; i ++ ) {
+
         var object = objects[ i ];
         var target = targets[ i ];
-        if(i == chosenNum){
-            object.element.innerHTML="<div class='number'><img src='images/head.png'/></div><div class='details'>watcher</div>";
-        }
         if(i==randomNum && scaleNum!=1){
-            chosenNum = randomNum;
-            object.element.innerHTML = "<div class='number'><img src='images/head.png'/></div><div class='details'>winner</div>";
             var scaleBig = new THREE.Vector3(15,15,15);
             new TWEEN.Tween(object.position)
                     .to({ x: 1, y: 1, z: 1 }, Math.random() * duration + duration)
@@ -252,21 +279,25 @@ function transform( targets, duration ,scaleNum) {
                     .start();
             //var a = new THREE.Euler( 0, 0, 0, '' );
             //object.rotation.copy(a);
+
         }
         else {
             new TWEEN.Tween(object.position)
                     .to({ x: target.position.x, y: target.position.y, z: target.position.z }, Math.random() * duration + duration)
                     .easing(TWEEN.Easing.Exponential.InOut)
                     .start();
+
             new TWEEN.Tween(object.rotation)
                     .to({ x: target.rotation.x, y: target.rotation.y, z: target.rotation.z }, Math.random() * duration + duration)
                     .easing(TWEEN.Easing.Exponential.InOut)
                     .start();
+
             new TWEEN.Tween(object.scale)
                     .to(scale, Math.random() * duration + duration)
                     .easing(TWEEN.Easing.Exponential.InOut)
                     .start();
         }
+
     }
 
     new TWEEN.Tween( this )
@@ -275,10 +306,12 @@ function transform( targets, duration ,scaleNum) {
             .start();
 }
 
+
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize( window.innerWidth, window.innerHeight );
+
 }
 
 function animate() {
@@ -290,6 +323,7 @@ function animate() {
 function render() {
     renderer.render( scene, camera );
 }
+
 </script>
 </body>
 </html>
